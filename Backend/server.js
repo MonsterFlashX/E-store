@@ -82,7 +82,7 @@ app.post("/api/orders/checkout", (req, res) => {
             });
 
             if (!productExists) {
-                res.status(404).json({
+                return res.status(404).json({
                     message: `Product with id: ${item.productId} does not exist`,
                 });
             }
@@ -96,10 +96,17 @@ app.post("/api/orders/checkout", (req, res) => {
             products.forEach(product => {
                 if (product.id === item.productId) {
                     if (product.stock === 0) {
-                        res.status(404).json({
+                        return res.status(404).json({
                             message: `Product ${product.name} (${product.id}) is out of stock`,
                         });
                     }
+
+                    if (product.stock < item.quantity) {
+                        return res.status(404).json({
+                            message: `Order quantity (${item.quantity}) for ${product.name} (id: ${product.id}) cannot be bigger than avialable stock (${product.stock})`,
+                        });
+                    }
+
                     product.stock -= item.quantity;
                 }
             });
@@ -118,11 +125,12 @@ app.post("/api/orders/checkout", (req, res) => {
 
         saveOrders(orders);
         saveProducts(products);
-        res.json({ message: "Order placed successfully!", orderId: newOrder.id });
+        return res.json({ message: "Order placed successfully!", orderId: newOrder.id });
     } catch (error) {
-        res.status(500).json({ error: "Failed to process order" });
+        return res.status(500).json({ error: "Failed to process order" });
     }
 });
+
 
 // Start the server
 const PORT = process.env.PORT || 7000;
