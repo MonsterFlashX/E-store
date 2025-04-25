@@ -24,6 +24,12 @@ function App() {
     let itemIndex = getItemIndex(cart, newProduct.id);
 
     if (itemIndex > -1) {
+      console.log(`Stock: ${newProduct.stock}`);
+      console.log(`cart[itemIndex].quantity: ${cart[itemIndex].quantity}`);
+      if (cart[itemIndex].quantity === newProduct.stock) {
+        alert(`Order quantity reached the limit: ${newProduct.stock}`);
+        return;
+      }
       let newQuantity = cart[itemIndex].quantity + 1;
       cartItem = {
         productId: newProduct.id,
